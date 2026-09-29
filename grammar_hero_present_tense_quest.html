@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Hero: Present Tense Quest</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fef3c7 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        h1, h2, h3, .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .signal-word {
+            background-color: #fef08a;
+            color: #854d0e;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            border: 1px dashed #ca8a04;
+            display: inline-block;
+        }
+
+        .bounce-gentle {
+            animation: bounceGentle 2s infinite ease-in-out;
+        }
+
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 1.5s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
+            100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .card-pop {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .card-pop:hover {
+            transform: translateY(-4px) scale(1.02);
+        }
+        .card-pop:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Shake animation for incorrect answer */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Target bucket highlight */
+        .drop-target-active {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 antialiased">
+
+    <!-- Top Navigation / Header -->
+    <header class="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="game.showHome()">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-500 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-200">
+                    <i class="fa-solid font-bold fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800 leading-tight">Grammar Hero</h1>
+                    <p class="text-xs text-indigo-600 font-semibold">A2.3 Present Tense Master</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Sound Toggle -->
+                <button id="sound-btn" onclick="sound.toggleSound()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <!-- Rule Book Button -->
+                <button onclick="game.openRules()" class="px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-sm flex items-center gap-2 transition border border-amber-300 shadow-sm">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span class="hidden sm:inline">Grammar Guide</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col justify-center items-center">
+
+        <!-- Owl Mascot Banner -->
+        <div id="mascot-container" class="w-full bg-white rounded-3xl p-4 shadow-md border border-slate-100 mb-6 flex items-center gap-4 transition-all">
+            <div class="relative shrink-0">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-amber-400 rounded-full flex items-center justify-center text-3xl sm:text-4xl shadow-inner border-2 border-amber-300 bounce-gentle">
+                    🦉
+                </div>
+                <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">Barnaby</span>
+            </div>
+            <div class="flex-1 relative bg-indigo-50/80 p-3 sm:p-4 rounded-2xl border border-indigo-100">
+                <!-- Triangle pointer -->
+                <div class="absolute left-0 top-1/2 -translate-x-2 -translate-y-1/2 w-0 h-0 border-t-8 border-t-transparent border-r-8 border-r-indigo-50 border-b-8 border-b-transparent"></div>
+                <p id="mascot-speech" class="text-sm sm:text-base font-semibold text-slate-700">
+                    Hello explorer! Ready to master <span class="text-indigo-600">Present Simple</span> and <span class="text-teal-600">Present Continuous</span>? Choose a level below!
+                </p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD / MENU VIEW -->
+        <div id="view-dashboard" class="w-full space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-extrabold text-slate-800">Select Your Challenge</h2>
+                <p class="text-slate-500 text-sm max-w-md mx-auto">Master habits, routines, and actions happening right now through 3 exciting levels!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Level 1 Card -->
+                <div onclick="game.startLevel(1)" class="bg-white rounded-3xl p-6 border-2 border-sky-100 shadow-lg shadow-sky-50 card-pop cursor-pointer flex flex-col justify-between group hover:border-sky-400">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:bg-sky-500 group-hover:text-white transition">
+                            1
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">Routine vs. Right Now</h3>
+                        <p class="text-xs text-slate-500 mb-4">Sort actions into Present Simple (habits/routines) or Continuous (happening now).</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                            <span class="text-xs font-bold text-sky-600">Level 1</span>
+                            <div id="stars-lvl-1" class="text-amber-400 text-sm">
+                                <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 2 Card -->
+                <div onclick="game.startLevel(2)" class="bg-white rounded-3xl p-6 border-2 border-teal-100 shadow-lg shadow-teal-50 card-pop cursor-pointer flex flex-col justify-between group hover:border-teal-400">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:bg-teal-500 group-hover:text-white transition">
+                            2
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">Sentence Fixer</h3>
+                        <p class="text-xs text-slate-500 mb-4">Become a grammar detective! Choose the correct verb form using time clues.</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                            <span class="text-xs font-bold text-teal-600">Level 2</span>
+                            <div id="stars-lvl-2" class="text-amber-400 text-sm">
+                                <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 3 Card -->
+                <div onclick="game.startLevel(3)" class="bg-white rounded-3xl p-6 border-2 border-indigo-100 shadow-lg shadow-indigo-50 card-pop cursor-pointer flex flex-col justify-between group hover:border-indigo-400">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl font-bold mb-4 group-hover:bg-indigo-500 group-hover:text-white transition">
+                            3
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">Time Marker Dash</h3>
+                        <p class="text-xs text-slate-500 mb-4">Fast-paced challenge! Match signal words like "always" or "at the moment" to their tense.</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                            <span class="text-xs font-bold text-indigo-600">Level 3</span>
+                            <div id="stars-lvl-3" class="text-amber-400 text-sm">
+                                <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAMEPLAY VIEW -->
+        <div id="view-gameplay" class="w-full hidden space-y-4">
+            
+            <!-- Game Bar (Score, Streak, Progress) -->
+            <div class="bg-white rounded-2xl p-4 shadow-md border border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                <!-- Back Button -->
+                <button onclick="game.showHome()" class="text-slate-400 hover:text-slate-600 transition text-sm font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> Exit
+                </button>
+
+                <!-- Progress Bar -->
+                <div class="flex-1 max-w-xs mx-2">
+                    <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                        <span>Question <span id="current-q-num">1</span>/<span id="total-q-num">8</span></span>
+                        <span id="streak-counter" class="text-amber-500 font-extrabold"><i class="fa-solid fa-fire"></i> 0 Streak</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-indigo-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="flex items-center gap-4 text-sm font-bold">
+                    <div class="bg-amber-50 text-amber-700 px-3 py-1 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-star text-amber-500"></i> <span id="game-score">0</span> pts
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Question Area -->
+            <div id="game-workspace" class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 min-h-[360px] flex flex-col justify-center items-center">
+                <!-- Injected via JavaScript based on active level -->
+            </div>
+
+            <!-- Feedback / Explanation Box -->
+            <div id="feedback-box" class="hidden rounded-2xl p-4 border text-sm transition-all animate-fade-in flex items-start gap-3">
+                <div id="feedback-icon" class="text-2xl shrink-0"></div>
+                <div class="space-y-1">
+                    <h4 id="feedback-title" class="font-bold text-base"></h4>
+                    <p id="feedback-text" class="text-slate-600 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Next / Continue Button -->
+            <div id="action-bar" class="hidden flex justify-end">
+                <button id="btn-next" onclick="game.nextQuestion()" class="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base shadow-lg shadow-indigo-200 transition card-pop flex items-center gap-2">
+                    <span>Continue</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- LEVEL SUMMARY VIEW -->
+        <div id="view-summary" class="w-full hidden space-y-6">
+            <div class="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 text-center space-y-6">
+                <div class="inline-block p-4 bg-indigo-50 text-indigo-600 rounded-full text-5xl mb-2 bounce-gentle">
+                    🏆
+                </div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">Level Completed!</h2>
+                    <p class="text-slate-500 text-sm mt-1">Awesome effort! Here is how you performed:</p>
+                </div>
+
+                <!-- Stars Display -->
+                <div id="summary-stars" class="flex justify-center gap-3 text-4xl text-amber-400">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+
+                <!-- Score Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-md mx-auto">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <span class="text-xs font-bold text-slate-400 block uppercase">Accuracy</span>
+                        <span id="summary-accuracy" class="text-2xl font-extrabold text-indigo-600">100%</span>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <span class="text-xs font-bold text-slate-400 block uppercase">Total Score</span>
+                        <span id="summary-score" class="text-2xl font-extrabold text-amber-500">800</span>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 col-span-2 sm:col-span-1">
+                        <span class="text-xs font-bold text-slate-400 block uppercase">Best Streak</span>
+                        <span id="summary-streak" class="text-2xl font-extrabold text-emerald-500">8</span>
+                    </div>
+                </div>
+
+                <!-- Question Review List -->
+                <div class="text-left bg-slate-50 rounded-2xl p-4 border border-slate-200 max-h-60 overflow-y-auto space-y-2">
+                    <h4 class="font-bold text-slate-700 text-sm mb-3">Review Answers:</h4>
+                    <div id="summary-review-list" class="space-y-2 text-xs sm:text-sm">
+                        <!-- Items populated JS -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+                    <button onclick="game.replayLevel()" class="px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Play Again
+                    </button>
+                    <button onclick="game.nextLevelOrHome()" class="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-200 flex items-center gap-2">
+                        <span>Next Challenge</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- RULE BOOK MODAL -->
+    <div id="modal-rules" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-slate-100 flex flex-col">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-amber-50">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📖</span>
+                    <h3 class="text-xl font-bold text-amber-900">Grammar Cheat Sheet</h3>
+                </div>
+                <button onclick="game.closeRules()" class="w-8 h-8 rounded-full bg-white hover:bg-slate-100 text-slate-500 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 overflow-y-auto space-y-6 text-slate-700 text-sm sm:text-base">
+                
+                <!-- Present Simple Section -->
+                <div class="bg-sky-50/70 border border-sky-200 rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center gap-2 text-sky-800 font-bold text-lg">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span>Present Simple</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-sky-950">Use for <b>habits, routines, permanent situations</b>, and <b>general truths</b>.</p>
+                    
+                    <div class="bg-white rounded-xl p-3 border border-sky-100 space-y-1 text-xs sm:text-sm">
+                        <p><strong>Form:</strong> Subject + Verb (s/es for He/She/It)</p>
+                        <p class="text-slate-500"><em>Example:</em> She <span class="font-bold text-sky-600">walks</span> to school every day.</p>
+                    </div>
+
+                    <div class="text-xs">
+                        <span class="font-bold text-sky-900">Key Time Markers (Signal Words):</span>
+                        <div class="flex flex-wrap gap-1.5 mt-1">
+                            <span class="signal-word">usually</span>
+                            <span class="signal-word">always</span>
+                            <span class="signal-word">every day</span>
+                            <span class="signal-word">often</span>
+                            <span class="signal-word">never</span>
+                            <span class="signal-word">on Mondays</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Present Continuous Section -->
+                <div class="bg-teal-50/70 border border-teal-200 rounded-2xl p-4 space-y-2">
+                    <div class="flex items-center gap-2 text-teal-800 font-bold text-lg">
+                        <i class="fa-solid fa-spinner"></i>
+                        <span>Present Continuous</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-teal-950">Use for <b>actions happening RIGHT NOW</b> or <b>temporary situations</b>.</p>
+                    
+                    <div class="bg-white rounded-xl p-3 border border-teal-100 space-y-1 text-xs sm:text-sm">
+                        <p><strong>Form:</strong> Subject + am/is/are + Verb-ing</p>
+                        <p class="text-slate-500"><em>Example:</em> She <span class="font-bold text-teal-600">is walking</span> to school right now.</p>
+                    </div>
+
+                    <div class="text-xs">
+                        <span class="font-bold text-teal-900">Key Time Markers (Signal Words):</span>
+                        <div class="flex flex-wrap gap-1.5 mt-1">
+                            <span class="signal-word">now</span>
+                            <span class="signal-word">right now</span>
+                            <span class="signal-word">at the moment</span>
+                            <span class="signal-word">Look!</span>
+                            <span class="signal-word">Listen!</span>
+                            <span class="signal-word">today</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stative Verbs Note -->
+                <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 space-y-1 text-xs sm:text-sm">
+                    <h4 class="font-bold text-amber-900 flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-amber-500"></i> Pro Tip: State Verbs
+                    </h4>
+                    <p class="text-slate-600">Verbs like <i>like, love, want, know, understand, believe</i> are usually <b>ONLY used in Present Simple</b>, even if happening right now!</p>
+                    <p class="text-emerald-700 font-medium">✓ "I want water right now." (Not: "I am wanting...")</p>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-100 bg-slate-50 text-right">
+                <button onclick="game.closeRules()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* WEB AUDIO SOUND SYNTHESIZER */
+        class SoundEngine {
+            constructor() {
+                this.enabled = true;
+                this.ctx = null;
+            }
+
+            initCtx() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+            }
+
+            toggleSound() {
+                this.enabled = !this.enabled;
+                const icon = document.getElementById('sound-icon');
+                if (this.enabled) {
+                    icon.className = 'fa-solid fa-volume-high';
+                } else {
+                    icon.className = 'fa-solid fa-volume-xmark';
+                }
+            }
+
+            playCorrect() {
+                if (!this.enabled) return;
+                this.initCtx();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+
+            playIncorrect() {
+                if (!this.enabled) return;
+                this.initCtx();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.setValueAtTime(180, now + 0.15); // Low tone drop
+
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            playComplete() {
+                if (!this.enabled) return;
+                this.initCtx();
+                if (!this.ctx) return;
+
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const now = this.ctx.currentTime + (idx * 0.1);
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                });
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        const GAME_DATA = {
+            level1: [
+                {
+                    statement: "I <span class='signal-word'>usually</span> drink tea in the morning.",
+                    tense: "simple",
+                    explanation: "<strong>'Usually'</strong> shows a regular habit or routine, so we use Present Simple."
+                },
+                {
+                    statement: "<span class='signal-word'>Look!</span> The dog is chasing a ball.",
+                    tense: "continuous",
+                    explanation: "<strong>'Look!'</strong> draws attention to something happening right at this moment, so we use Present Continuous."
+                },
+                {
+                    statement: "They are playing football <span class='signal-word'>at the moment</span>.",
+                    tense: "continuous",
+                    explanation: "<strong>'At the moment'</strong> means right now, requiring Present Continuous."
+                },
+                {
+                    statement: "My brother plays guitar <span class='signal-word'>every weekend</span>.",
+                    tense: "simple",
+                    explanation: "<strong>'Every weekend'</strong> refers to a repeated routine, so Present Simple is used."
+                },
+                {
+                    statement: "She is cooking dinner <span class='signal-word'>right now</span>.",
+                    tense: "continuous",
+                    explanation: "<strong>'Right now'</strong> indicates an action currently in progress."
+                },
+                {
+                    statement: "Water boils at 100 degrees Celsius.",
+                    tense: "simple",
+                    explanation: "This is a general fact/truth, so we always use Present Simple."
+                },
+                {
+                    statement: "<span class='signal-word'>Listen!</span> Someone is singing upstairs.",
+                    tense: "continuous",
+                    explanation: "<strong>'Listen!'</strong> alerts us to an action happening currently."
+                },
+                {
+                    statement: "We <span class='signal-word'>always</span> go to the beach in summer.",
+                    tense: "simple",
+                    explanation: "<strong>'Always'</strong> is an frequency adverb used for routines/habits in Present Simple."
+                }
+            ],
+            level2: [
+                {
+                    sentence: "Sarah {blank} her homework <span class='signal-word'>at the moment</span>.",
+                    options: ["is doing", "does"],
+                    correct: "is doing",
+                    explanation: "'At the moment' signals an action happening right now (Present Continuous)."
+                },
+                {
+                    sentence: "Tom <span class='signal-word'>always</span> {blank} breakfast at 7:00 AM.",
+                    options: ["eats", "is eating"],
+                    correct: "eats",
+                    explanation: "'Always' tells us this is a regular routine (Present Simple)."
+                },
+                {
+                    sentence: "<span class='signal-word'>Listen!</span> The birds {blank} outside.",
+                    options: ["sing", "are singing"],
+                    correct: "are singing",
+                    explanation: "'Listen!' means it is taking place right now (Present Continuous)."
+                },
+                {
+                    sentence: "I <span class='signal-word'>never</span> {blank} coffee before bed.",
+                    options: ["drink", "am drinking"],
+                    correct: "drink",
+                    explanation: "'Never' is a frequency marker for habits (Present Simple)."
+                },
+                {
+                    sentence: "Where is Mark? He {blank} soccer <span class='signal-word'>today</span>.",
+                    options: ["plays", "is playing"],
+                    correct: "is playing",
+                    explanation: "'Today' describes a temporary activity happening in this current period."
+                },
+                {
+                    sentence: "My parents {blank} in a big house.",
+                    options: ["live", "are living"],
+                    correct: "live",
+                    explanation: "'Living' in a home is considered a permanent situation, requiring Present Simple."
+                },
+                {
+                    sentence: "Shh! The baby {blank} <span class='signal-word'>right now</span>.",
+                    options: ["sleeps", "is sleeping"],
+                    correct: "is sleeping",
+                    explanation: "'Right now' indicates an action in progress right at this second."
+                },
+                {
+                    sentence: "We {blank} English lessons <span class='signal-word'>on Tuesdays</span>.",
+                    options: ["have", "are having"],
+                    correct: "have",
+                    explanation: "'On Tuesdays' specifies a recurring schedule or habit."
+                }
+            ],
+            level3: [
+                { marker: "right now", tense: "continuous" },
+                { marker: "usually", tense: "simple" },
+                { marker: "at the moment", tense: "continuous" },
+                { marker: "every day", tense: "simple" },
+                { marker: "Look!", tense: "continuous" },
+                { marker: "always", tense: "simple" },
+                { marker: "Listen!", tense: "continuous" },
+                { marker: "on Mondays", tense: "simple" },
+                { marker: "currently", tense: "continuous" },
+                { marker: "often", tense: "simple" }
+            ]
+        };
+
+        class GameEngine {
+            constructor() {
+                this.currentLevel = 1;
+                this.currentIndex = 0;
+                this.score = 0;
+                this.streak = 0;
+                this.bestStreak = 0;
+                this.answersHistory = [];
+                this.userStars = { 1: 0, 2: 0, 3: 0 };
+
+                this.levelData = [];
+            }
+
+            showHome() {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                document.getElementById('view-gameplay').classList.add('hidden');
+                document.getElementById('view-summary').classList.add('hidden');
+                this.updateMascot("Welcome back! Select a level to start practicing.");
+            }
+
+            openRules() {
+                document.getElementById('modal-rules').classList.remove('hidden');
+            }
+
+            closeRules() {
+                document.getElementById('modal-rules').classList.add('hidden');
+            }
+
+            updateMascot(text) {
+                document.getElementById('mascot-speech').innerHTML = text;
+            }
+
+            startLevel(lvl) {
+                this.currentLevel = lvl;
+                this.currentIndex = 0;
+                this.score = 0;
+                this.streak = 0;
+                this.bestStreak = 0;
+                this.answersHistory = [];
+
+                // Copy dataset
+                if (lvl === 1) this.levelData = [...GAME_DATA.level1];
+                if (lvl === 2) this.levelData = [...GAME_DATA.level2];
+                if (lvl === 3) this.levelData = [...GAME_DATA.level3];
+
+                // Shuffle array slightly for replayability
+                this.levelData.sort(() => Math.random() - 0.5);
+
+                document.getElementById('view-dashboard').classList.add('hidden');
+                document.getElementById('view-summary').classList.add('hidden');
+                document.getElementById('view-gameplay').classList.remove('hidden');
+
+                this.updateHeaderStats();
+                this.renderQuestion();
+            }
+
+            updateHeaderStats() {
+                document.getElementById('current-q-num').innerText = this.currentIndex + 1;
+                document.getElementById('total-q-num').innerText = this.levelData.length;
+                document.getElementById('game-score').innerText = this.score;
+                document.getElementById('streak-counter').innerHTML = `<i class="fa-solid fa-fire"></i> ${this.streak} Streak`;
+
+                const progress = ((this.currentIndex) / this.levelData.length) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+            }
+
+            renderQuestion() {
+                // Reset feedback
+                const feedbackBox = document.getElementById('feedback-box');
+                feedbackBox.className = 'hidden';
+                document.getElementById('action-bar').classList.add('hidden');
+
+                this.updateHeaderStats();
+
+                const workspace = document.getElementById('game-workspace');
+                workspace.innerHTML = '';
+
+                const q = this.levelData[this.currentIndex];
+
+                if (this.currentLevel === 1) {
+                    this.updateMascot("Is this action a <b>routine/habit</b> or happening <b>right now</b>?");
+                    this.renderLevel1(workspace, q);
+                } else if (this.currentLevel === 2) {
+                    this.updateMascot("Read carefully! Find the time signal word and pick the correct form.");
+                    this.renderLevel2(workspace, q);
+                } else if (this.currentLevel === 3) {
+                    this.updateMascot("Time Marker Dash! Match the time signal word to its correct tense.");
+                    this.renderLevel3(workspace, q);
+                }
+            }
+
+            /* Level 1: Sorting / Category Selection */
+            renderLevel1(container, data) {
+                const html = `
+                    <div class="w-full text-center space-y-6">
+                        <div class="bg-indigo-50/80 border border-indigo-100 p-6 rounded-3xl shadow-inner max-w-lg mx-auto">
+                            <span class="text-xs font-bold text-indigo-500 uppercase tracking-wider block mb-2">Sentence Card</span>
+                            <p class="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">${data.statement}</p>
+                        </div>
+
+                        <p class="text-sm text-slate-500 font-semibold">Categorize this sentence:</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+                            <button onclick="game.handleAnswer('simple')" class="p-5 rounded-2xl bg-white border-2 border-sky-200 hover:border-sky-500 hover:bg-sky-50 text-slate-800 font-bold transition shadow-md card-pop flex flex-col items-center gap-2 group">
+                                <span class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl group-hover:bg-sky-500 group-hover:text-white transition">
+                                    <i class="fa-solid fa-repeat"></i>
+                                </span>
+                                <div>
+                                    <div class="text-base text-sky-900 font-bold">Present Simple</div>
+                                    <div class="text-xs text-slate-400 font-normal">Routine / Habit / Truth</div>
+                                </div>
+                            </button>
+
+                            <button onclick="game.handleAnswer('continuous')" class="p-5 rounded-2xl bg-white border-2 border-teal-200 hover:border-teal-500 hover:bg-teal-50 text-slate-800 font-bold transition shadow-md card-pop flex flex-col items-center gap-2 group">
+                                <span class="w-10 h-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-xl group-hover:bg-teal-500 group-hover:text-white transition">
+                                    <i class="fa-solid fa-play"></i>
+                                </span>
+                                <div>
+                                    <div class="text-base text-teal-900 font-bold">Present Continuous</div>
+                                    <div class="text-xs text-slate-400 font-normal">Happening Right Now</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = html;
+            }
+
+            /* Level 2: Sentence Fixer (Multiple Choice fill-in) */
+            renderLevel2(container, data) {
+                const formattedSentence = data.sentence.replace('{blank}', '<span class="inline-block px-4 py-1 border-b-2 border-indigo-500 font-extrabold text-indigo-600">_____</span>');
+
+                let optionsHtml = '';
+                data.options.forEach(opt => {
+                    optionsHtml += `
+                        <button onclick="game.handleAnswer('${opt}')" class="px-6 py-4 rounded-2xl bg-white border-2 border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/50 text-slate-800 font-bold text-lg transition shadow-md card-pop">
+                            ${opt}
+                        </button>
+                    `;
+                });
+
+                const html = `
+                    <div class="w-full text-center space-y-8">
+                        <div class="bg-amber-50/60 border border-amber-200 p-6 rounded-3xl shadow-sm max-w-xl mx-auto">
+                            <p class="text-xl sm:text-2xl font-bold text-slate-800 leading-relaxed">${formattedSentence}</p>
+                        </div>
+
+                        <p class="text-xs text-slate-400 uppercase tracking-widest font-bold">Select the correct verb form:</p>
+
+                        <div class="flex flex-wrap justify-center gap-4 max-w-md mx-auto">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = html;
+            }
+
+            /* Level 3: Time Marker Dash */
+            renderLevel3(container, data) {
+                const html = `
+                    <div class="w-full text-center space-y-6">
+                        <div class="inline-block bg-amber-100 border-2 border-amber-300 text-amber-900 px-6 py-3 rounded-2xl shadow-md">
+                            <span class="text-xs font-bold block uppercase text-amber-600">Signal Word / Time Marker</span>
+                            <span class="text-2xl sm:text-3xl font-extrabold">${data.marker}</span>
+                        </div>
+
+                        <p class="text-sm text-slate-500 font-semibold">Which tense usually uses this word?</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+                            <button onclick="game.handleAnswer('simple')" class="p-5 rounded-2xl bg-white border-2 border-sky-200 hover:border-sky-500 hover:bg-sky-50 text-slate-800 font-bold transition shadow-md card-pop flex items-center justify-center gap-3">
+                                <i class="fa-solid fa-clock text-sky-500 text-xl"></i>
+                                <span class="text-base text-sky-950 font-bold">Present Simple</span>
+                            </button>
+
+                            <button onclick="game.handleAnswer('continuous')" class="p-5 rounded-2xl bg-white border-2 border-teal-200 hover:border-teal-500 hover:bg-teal-50 text-slate-800 font-bold transition shadow-md card-pop flex items-center justify-center gap-3">
+                                <i class="fa-solid fa-bolt text-teal-500 text-xl"></i>
+                                <span class="text-base text-teal-950 font-bold">Present Continuous</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = html;
+            }
+
+            handleAnswer(selected) {
+                const q = this.levelData[this.currentIndex];
+                let isCorrect = false;
+
+                if (this.currentLevel === 1 || this.currentLevel === 3) {
+                    isCorrect = (selected === q.tense);
+                } else if (this.currentLevel === 2) {
+                    isCorrect = (selected === q.correct);
+                }
+
+                // Record history
+                this.answersHistory.push({
+                    question: q.statement || q.sentence || q.marker,
+                    userAns: selected,
+                    correctAns: q.tense || q.correct,
+                    isCorrect: isCorrect,
+                    explanation: q.explanation || (q.tense === 'simple' ? 'Used for habits/routines.' : 'Used for actions happening now.')
+                });
+
+                // Feedback UI
+                const feedbackBox = document.getElementById('feedback-box');
+                const feedbackTitle = document.getElementById('feedback-title');
+                const feedbackText = document.getElementById('feedback-text');
+                const feedbackIcon = document.getElementById('feedback-icon');
+
+                feedbackBox.classList.remove('hidden');
+
+                if (isCorrect) {
+                    sound.playCorrect();
+                    this.score += 100 + (this.streak * 10);
+                    this.streak++;
+                    if (this.streak > this.bestStreak) this.bestStreak = this.streak;
+
+                    feedbackBox.className = "rounded-2xl p-4 border text-sm transition-all flex items-start gap-3 bg-emerald-50 border-emerald-200 text-emerald-900";
+                    feedbackIcon.innerHTML = "✅";
+                    feedbackTitle.innerText = "Excellent!";
+                    feedbackText.innerHTML = q.explanation || "That's right! You identified the correct tense marker.";
+
+                    this.updateMascot("Great job! Keep up the good momentum!");
+                } else {
+                    sound.playIncorrect();
+                    this.streak = 0;
+
+                    feedbackBox.className = "rounded-2xl p-4 border text-sm transition-all flex items-start gap-3 bg-rose-50 border-rose-200 text-rose-900 animate-shake";
+                    feedbackIcon.innerHTML = "💡";
+                    feedbackTitle.innerText = "Not quite!";
+                    feedbackText.innerHTML = q.explanation || "Remember to check whether the word shows a routine or an action happening right now.";
+
+                    this.updateMascot("Don't worry! Read the explanation below to learn why.");
+                }
+
+                this.updateHeaderStats();
+
+                // Disable workspace interactions
+                const workspace = document.getElementById('game-workspace');
+                const buttons = workspace.querySelectorAll('button');
+                buttons.forEach(b => b.disabled = true);
+
+                document.getElementById('action-bar').classList.remove('hidden');
+            }
+
+            nextQuestion() {
+                this.currentIndex++;
+                if (this.currentIndex >= this.levelData.length) {
+                    this.finishLevel();
+                } else {
+                    this.renderQuestion();
+                }
+            }
+
+            finishLevel() {
+                sound.playComplete();
+                document.getElementById('view-gameplay').classList.add('hidden');
+                document.getElementById('view-summary').classList.remove('hidden');
+
+                const correctCount = this.answersHistory.filter(a => a.isCorrect).length;
+                const total = this.answersHistory.length;
+                const accuracy = Math.round((correctCount / total) * 100);
+
+                // Calculate stars
+                let stars = 1;
+                if (accuracy >= 70) stars = 2;
+                if (accuracy >= 90) stars = 3;
+
+                this.userStars[this.currentLevel] = Math.max(this.userStars[this.currentLevel], stars);
+                this.updateDashboardStars();
+
+                // Update Summary DOM
+                document.getElementById('summary-accuracy').innerText = `${accuracy}%`;
+                document.getElementById('summary-score').innerText = this.score;
+                document.getElementById('summary-streak').innerText = this.bestStreak;
+
+                // Stars DOM
+                const starsContainer = document.getElementById('summary-stars');
+                starsContainer.innerHTML = '';
+                for (let i = 1; i <= 3; i++) {
+                    if (i <= stars) {
+                        starsContainer.innerHTML += `<i class="fa-solid fa-star text-amber-400"></i>`;
+                    } else {
+                        starsContainer.innerHTML += `<i class="fa-regular fa-star text-slate-300"></i>`;
+                    }
+                }
+
+                // Render review list
+                const reviewList = document.getElementById('summary-review-list');
+                reviewList.innerHTML = '';
+                this.answersHistory.forEach((item, idx) => {
+                    reviewList.innerHTML += `
+                        <div class="p-2.5 rounded-xl ${item.isCorrect ? 'bg-emerald-50/60 border border-emerald-100' : 'bg-rose-50/60 border border-rose-100'} flex items-start gap-2">
+                            <span class="mt-0.5">${item.isCorrect ? '✅' : '❌'}</span>
+                            <div class="flex-1">
+                                <p class="font-bold text-slate-800">${item.question}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">${item.explanation}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                this.updateMascot(`Awesome work completing Level ${this.currentLevel}! You earned ${stars} star(s)!`);
+            }
+
+            updateDashboardStars() {
+                for (let lvl = 1; lvl <= 3; lvl++) {
+                    const count = this.userStars[lvl];
+                    const container = document.getElementById(`stars-lvl-${lvl}`);
+                    if (container) {
+                        let html = '';
+                        for (let i = 1; i <= 3; i++) {
+                            if (i <= count) {
+                                html += `<i class="fa-solid fa-star"></i>`;
+                            } else {
+                                html += `<i class="fa-regular fa-star"></i>`;
+                            }
+                        }
+                        container.innerHTML = html;
+                    }
+                }
+            }
+
+            replayLevel() {
+                this.startLevel(this.currentLevel);
+            }
+
+            nextLevelOrHome() {
+                if (this.currentLevel < 3) {
+                    this.startLevel(this.currentLevel + 1);
+                } else {
+                    this.showHome();
+                }
+            }
+        }
+
+        // Initialize Game Instance
+        const game = new GameEngine();
+    </script>
+</body>
+</html>
